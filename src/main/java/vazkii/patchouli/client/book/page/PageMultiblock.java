@@ -7,44 +7,28 @@ import java.util.WeakHashMap;
 
 import javax.annotation.Nonnull;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix4f;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.client.renderer.Vector3f;
-import net.minecraft.client.renderer.Vector4f;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayers;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
+import net.minecraft.client.render.block.entity.BlockEntityRenderer;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.math.Vector3f;
+import net.minecraft.client.util.math.Vector4f;
 import net.minecraft.util.math.Vec3i;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import org.lwjgl.opengl.GL11;
 
 import com.google.gson.annotations.SerializedName;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraft.util.math.Matrix4f;
 import vazkii.patchouli.api.IMultiblock;
 import vazkii.patchouli.client.base.ClientTicker;
 import vazkii.patchouli.client.base.PersistentData;
@@ -55,6 +39,7 @@ import vazkii.patchouli.client.book.gui.GuiBookEntry;
 import vazkii.patchouli.client.book.gui.button.GuiButtonBookEye;
 import vazkii.patchouli.client.book.page.abstr.PageWithText;
 import vazkii.patchouli.client.handler.MultiblockVisualizationHandler;
+import vazkii.patchouli.client.mixin.MixinBlockEntity;
 import vazkii.patchouli.common.base.Patchouli;
 import vazkii.patchouli.common.multiblock.AbstractMultiblock;
 import vazkii.patchouli.common.multiblock.MultiblockRegistry;
@@ -65,7 +50,7 @@ public class PageMultiblock extends PageWithText {
 
 	String name;
 	@SerializedName("multiblock_id")
-	ResourceLocation multiblockId;
+	Identifier multiblockId;
 	
 	@SerializedName("multiblock")
 	SerializedMultiblock serializedMultiblock;
@@ -74,13 +59,13 @@ public class PageMultiblock extends PageWithText {
 	boolean showVisualizeButton = true;
 	
 	private transient AbstractMultiblock multiblockObj;
-	private transient Button visualizeButton;
+	private transient ButtonWidget visualizeButton;
 
 	@Override
 	public void build(BookEntry entry, int pageNum) {
 		if(multiblockId != null) {
 			IMultiblock mb = MultiblockRegistry.MULTIBLOCKS.get(multiblockId);
-			
+
 			if(mb instanceof AbstractMultiblock)
 				multiblockObj = (AbstractMultiblock) mb;
 		}
@@ -121,7 +106,7 @@ public class PageMultiblock extends PageWithText {
 		super.render(mouseX, mouseY, pticks);
 	}
 	
-	public void handleButtonVisualize(Button button) {
+	public void handleButtonVisualize(ButtonWidget button) {
 		String entryKey = parent.getEntry().getId().toString();
 		Bookmark bookmark = new Bookmark(entryKey, pageNum / 2);
 		MultiblockVisualizationHandler.setMultiblock(multiblockObj, name, bookmark, true);
@@ -178,7 +163,7 @@ public class PageMultiblock extends PageWithText {
 		// Finally apply the rotations
 		eye.transform(rotMat);
 		eye.normalizeProjectiveCoordinates();
-		renderElements(multiblockObj, BlockPos.getAllInBoxMutable(BlockPos.ZERO, new BlockPos(sizeX - 1, sizeY - 1, sizeZ - 1)), eye);
+		renderElements(multiblockObj, BlockPos.iterate(BlockPos.ORIGIN, new BlockPos(sizeX - 1, sizeY - 1, sizeZ - 1)), eye);
 
 		RenderSystem.popMatrix();
 	}
@@ -188,7 +173,7 @@ public class PageMultiblock extends PageWithText {
 		RenderSystem.color4f(1F, 1F, 1F, 1F);
 		RenderSystem.translatef(0, 0, -1);
 
-		IRenderTypeBuffer.Impl buffers = Minecraft.getInstance().getBufferBuilders().getEntityVertexConsumers();
+		VertexConsumerProvider.Immediate buffers = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
 		doWorldRenderPass(mb, blocks, buffers, eye);
 		doTileEntityRenderPass(mb, blocks, buffers, eye);
 
@@ -197,43 +182,37 @@ public class PageMultiblock extends PageWithText {
 		RenderSystem.popMatrix();
 	}
 
-	private void doWorldRenderPass(AbstractMultiblock mb, Iterable<? extends BlockPos> blocks, final @Nonnull IRenderTypeBuffer.Impl buffers, Vector4f eye) {
+	private void doWorldRenderPass(AbstractMultiblock mb, Iterable<? extends BlockPos> blocks, final @Nonnull VertexConsumerProvider.Immediate buffers, Vector4f eye) {
 		MatrixStack ms = new MatrixStack();
 		for (BlockPos pos : blocks) {
 			BlockState bs = mb.getBlockState(pos);
+			VertexConsumer buffer = buffers.getBuffer(RenderLayers.getBlockLayer(bs));
 
 			ms.push();
 			ms.translate(pos.getX(), pos.getY(), pos.getZ());
-			for (RenderType layer : RenderType.getBlockLayers()) {
-				if (RenderTypeLookup.canRenderInLayer(bs, layer)) {
-					ForgeHooksClient.setRenderLayer(layer);
-					IVertexBuilder buffer = buffers.getBuffer(layer);
-					Minecraft.getInstance().getBlockRendererDispatcher().renderBlock(bs, pos, mb, ms, buffer, false, RAND);
-					ForgeHooksClient.setRenderLayer(null);
-				}
-			}
+			MinecraftClient.getInstance().getBlockRenderManager().renderBlock(bs, pos, mb, ms, buffer, false, RAND);
 			ms.pop();
 		}
 	}
 
 	// Hold errored TEs weakly, this may cause some dupe errors but will prevent spamming it every frame
-	private final transient Set<TileEntity> erroredTiles = Collections.newSetFromMap(new WeakHashMap<>());
+	private final transient Set<BlockEntity> erroredTiles = Collections.newSetFromMap(new WeakHashMap<>());
 
-	private void doTileEntityRenderPass(AbstractMultiblock mb, Iterable<? extends BlockPos> blocks, IRenderTypeBuffer buffers, Vector4f eye) {
+	private void doTileEntityRenderPass(AbstractMultiblock mb, Iterable<? extends BlockPos> blocks, VertexConsumerProvider buffers, Vector4f eye) {
 		MatrixStack ms = new MatrixStack();
 
 		for (BlockPos pos : blocks) {
-			TileEntity te = mb.getTileEntity(pos);
+			BlockEntity te = mb.getBlockEntity(pos);
 			if (te != null && !erroredTiles.contains(te)) {
 				te.setLocation(mc.world, pos);
 
 				// fake cached state in case the renderer checks it as we don't want to query the actual world
-				ObfuscationReflectionHelper.setPrivateValue(TileEntity.class, te, mb.getBlockState(pos), "field_195045_e");
+				((MixinBlockEntity) te).setCachedState(mb.getBlockState(pos));
 
 				ms.push();
 				ms.translate(pos.getX(), pos.getY(), pos.getZ());
 				try {
-					TileEntityRenderer<TileEntity> renderer = TileEntityRendererDispatcher.instance.getRenderer(te);
+					BlockEntityRenderer<BlockEntity> renderer = BlockEntityRenderDispatcher.INSTANCE.get(te);
 					if (renderer != null) {
 						renderer.render(te, ClientTicker.partialTicks, ms, buffers, 0xF000F0, OverlayTexture.DEFAULT_UV);
 					}

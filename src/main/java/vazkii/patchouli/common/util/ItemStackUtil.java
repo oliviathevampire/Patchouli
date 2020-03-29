@@ -2,6 +2,7 @@ package vazkii.patchouli.common.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import com.google.gson.Gson;
@@ -9,24 +10,26 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.JsonOps;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.datafixer.NbtOps;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTDynamicOps;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.tag.ItemTags;
+import net.minecraft.tag.Tag;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
+import vazkii.patchouli.common.mixin.MixinIngredient;
+import com.mojang.datafixers.Dynamic;
+import com.mojang.datafixers.types.JsonOps;
 
 public class ItemStackUtil {
 	private static final Gson GSON = new GsonBuilder().create();
 	
 	public static String serializeStack(ItemStack stack) {
 		StringBuilder builder = new StringBuilder();
-		builder.append(stack.getItem().getRegistryName().toString());
+		builder.append(Registry.ITEM.getId(stack.getItem()).toString());
 
 		int count = stack.getCount();
 		if (count > 1) {
@@ -35,7 +38,7 @@ public class ItemStackUtil {
 		}
 		
 		if(stack.hasTag()) {
-			Dynamic<?> dyn = new Dynamic<>(NBTDynamicOps.INSTANCE, stack.getTag());
+			Dynamic<?> dyn = new Dynamic<>(NbtOps.INSTANCE, stack.getTag());
 			JsonElement j = dyn.convert(JsonOps.INSTANCE).getValue();
 			builder.append(GSON.toJson(j));
 		}
@@ -63,16 +66,17 @@ public class ItemStackUtil {
 			return ItemStack.EMPTY;
 		
 		int countn = Integer.parseInt(count);
-		ResourceLocation key = new ResourceLocation(tokens[0], tokens[1]);
-		if (!ForgeRegistries.ITEMS.containsKey(key)) {
+		Identifier key = new Identifier(tokens[0], tokens[1]);
+		Optional<Item> maybeItem = Registry.ITEM.getOrEmpty(key);
+		if (!maybeItem.isPresent()) {
 			throw new RuntimeException("Unknown item ID: " + key);
 		}
-		Item item = ForgeRegistries.ITEMS.getValue(key);
+		Item item = maybeItem.get();
 		ItemStack stack = new ItemStack(item, countn);
 
 		if(!nbt.isEmpty())
 			try {
-				stack.setTag(JsonToNBT.getTagFromJson(nbt));
+				stack.setTag(StringNbtReader.parse(nbt));
 			} catch (CommandSyntaxException e) {
 				throw new RuntimeException("Failed to parse ItemStack JSON" , e);
 			}
@@ -81,7 +85,7 @@ public class ItemStackUtil {
 	}
 	
 	public static String serializeIngredient(Ingredient ingredient) {
-		ItemStack[] stacks = ingredient.getMatchingStacks();
+		ItemStack[] stacks = ((MixinIngredient) (Object) ingredient).getMatchingStacks();
 		String[] stacksSerialized = new String[stacks.length];
 		for (int i = 0; i < stacks.length; i++) {
 			stacksSerialized[i] = serializeStack(stacks[i]);
@@ -91,7 +95,7 @@ public class ItemStackUtil {
 	}
 
 	public static Ingredient loadIngredientFromString(String ingredientString) {
-		return Ingredient.fromStacks(loadStackListFromString(ingredientString).toArray(new ItemStack[0]));
+		return Ingredient.ofStacks(loadStackListFromString(ingredientString).toArray(new ItemStack[0]));
 	}
 
 	public static String serializeStackList(List<ItemStack> stacks) {
@@ -107,9 +111,9 @@ public class ItemStackUtil {
 		List<ItemStack> stacks = new ArrayList<>();
 		for (int i = 0; i < stacksSerialized.length; i++) {
 			if (stacksSerialized[i].startsWith("tag:")) {
-				Tag<Item> tag = ItemTags.getCollection().get(new ResourceLocation(stacksSerialized[i].substring(4)));
+				Tag<Item> tag = ItemTags.getContainer().get(new Identifier(stacksSerialized[i].substring(4)));
 				if(tag != null) {
-					for(Item item : tag.getAllElements())
+					for(Item item : tag.values())
 						stacks.add(new ItemStack(item));
 				}
 			} else {

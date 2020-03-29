@@ -1,25 +1,29 @@
 package vazkii.patchouli.common.network.message;
 
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.network.PacketContext;
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.fabric.api.server.PlayerStream;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.ClientBookRegistry;
-
-import java.util.function.Supplier;
+import vazkii.patchouli.common.base.Patchouli;
 
 public class MessageReloadBookContents {
-    public MessageReloadBookContents(PacketBuffer buf) {}
+    public static final Identifier ID = new Identifier(Patchouli.MOD_ID, "reload_books");
 
-    public MessageReloadBookContents() {}
-
-    public void encode(PacketBuffer buf) {
-
+    public static void sendToAll(MinecraftServer server) {
+        PlayerStream.all(server).forEach(MessageReloadBookContents::send);
     }
 
-    public boolean receive(Supplier<NetworkEvent.Context> context) {
-        if (context.get().getDirection().getReceptionSide().isClient()) {
-            context.get().enqueueWork(ClientBookRegistry.INSTANCE::reload);
-            return true;
-        }
-        return false;
+    public static void send(PlayerEntity player) {
+        PacketByteBuf buf = new PacketByteBuf(Unpooled.EMPTY_BUFFER);
+        ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, ID, buf);
+    }
+
+    public static void handle(PacketContext context, PacketByteBuf buf) {
+        context.getTaskQueue().submit(ClientBookRegistry.INSTANCE::reload);
     }
 }

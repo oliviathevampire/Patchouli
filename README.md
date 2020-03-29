@@ -1,3 +1,14 @@
+## Important Note
+NOTE: This is an experimental, for-fun Fabric port of Patchouli.
+You will receive NO support at all if you run this.
+Please don't bother anyone if you encounter issues running this.
+
+## Why?
+* Various issues with the forge ecosystem are tiring me out
+* I (williewillus) want to see how Fabric is coming along
+* I can't make an educated judgment on Forge vs. Fabric if I haven't used both
+* The best way to get so called "educated" is to port a real world use-case to Fabric
+
 # Patchouli
 Accessible, Data-Driven, Dependency-Free Documentation for Minecraft Modders and Pack Makers
 

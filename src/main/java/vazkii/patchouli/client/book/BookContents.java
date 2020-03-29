@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -22,15 +23,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.mojang.datafixers.util.Pair;
+import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.resource.language.I18n;
 import org.apache.commons.io.FilenameUtils;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
-import net.minecraftforge.forgespi.language.IModInfo;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.client.book.gui.GuiBookLanding;
 import vazkii.patchouli.client.book.template.BookTemplate;
@@ -45,13 +44,13 @@ public class BookContents extends AbstractReadStateHolder {
 	private static final String[] ORDINAL_SUFFIXES = new String[]{ "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
 	protected static final String DEFAULT_LANG = "en_us";
 	
-	public static final Map<ResourceLocation, Supplier<BookTemplate>> addonTemplates = new ConcurrentHashMap<>();
+	public static final Map<Identifier, Supplier<BookTemplate>> addonTemplates = new ConcurrentHashMap<>();
 
 	public final Book book;
 
-	public Map<ResourceLocation, BookCategory> categories = new HashMap<>();
-	public Map<ResourceLocation, BookEntry> entries = new HashMap<>();
-	public Map<ResourceLocation, Supplier<BookTemplate>> templates = new HashMap<>();
+	public Map<Identifier, BookCategory> categories = new HashMap<>();
+	public Map<Identifier, BookEntry> entries = new HashMap<>();
+	public Map<Identifier, Supplier<BookTemplate>> templates = new HashMap<>();
 	public Map<StackWrapper, Pair<BookEntry, Integer>> recipeMappings = new HashMap<>();
 	private boolean errored = false;
 	private Exception exception = null;
@@ -86,11 +85,11 @@ public class BookContents extends AbstractReadStateHolder {
 
 	public void openLexiconGui(GuiBook gui, boolean push) {
 		if(gui.canBeOpened()) {
-			Minecraft mc = Minecraft.getInstance();
+			MinecraftClient mc = MinecraftClient.getInstance();
 			if(push && mc.currentScreen instanceof GuiBook && gui != mc.currentScreen)
 				guiStack.push((GuiBook) mc.currentScreen);
 
-			mc.displayGuiScreen(gui);
+			mc.openScreen(gui);
 			gui.onFirstOpened();
 		}
 	}
@@ -101,14 +100,14 @@ public class BookContents extends AbstractReadStateHolder {
 		try {
 			int ver = Integer.parseInt(book.version);
 			if(ver == 0)
-				return I18n.format(book.subtitle);
+				return I18n.translate(book.subtitle);
 
 			editionStr = numberToOrdinal(ver); 
 		} catch(NumberFormatException e) {
-			editionStr = I18n.format("patchouli.gui.lexicon.dev_edition");
+			editionStr = I18n.translate("patchouli.gui.lexicon.dev_edition");
 		}
 
-		return I18n.format("patchouli.gui.lexicon.edition_str", editionStr);
+		return I18n.translate("patchouli.gui.lexicon.edition_str", editionStr);
 	}
 
 	public void reload(boolean isOverride) {
@@ -129,9 +128,9 @@ public class BookContents extends AbstractReadStateHolder {
 			else indexIcon = BookIcon.from(book.indexIconRaw);
 		}
 
-		List<ResourceLocation> foundCategories = new ArrayList<>();
-		List<ResourceLocation> foundEntries = new ArrayList<>();
-		List<ResourceLocation> foundTemplates = new ArrayList<>();
+		List<Identifier> foundCategories = new ArrayList<>();
+		List<Identifier> foundEntries = new ArrayList<>();
+		List<Identifier> foundTemplates = new ArrayList<>();
 
 		try { 
 			String bookName = book.id.getPath();
@@ -140,14 +139,14 @@ public class BookContents extends AbstractReadStateHolder {
 			findFiles("entries", foundEntries);
 			findFiles("templates", foundTemplates);
 			
-			foundCategories.forEach(c -> loadCategory(c, new ResourceLocation(c.getNamespace(),
+			foundCategories.forEach(c -> loadCategory(c, new Identifier(c.getNamespace(),
 					String.format("%s/%s/%s/categories/%s.json", BookRegistry.BOOKS_LOCATION, bookName, DEFAULT_LANG, c.getPath())), book));
-			foundEntries.stream().map(id -> loadEntry(id, new ResourceLocation(id.getNamespace(),
+			foundEntries.stream().map(id -> loadEntry(id, new Identifier(id.getNamespace(),
 						String.format("%s/%s/%s/entries/%s.json", BookRegistry.BOOKS_LOCATION, bookName, DEFAULT_LANG, id.getPath())), book))
 					.filter(Optional::isPresent)
 					.map(Optional::get)
 					.forEach(b -> entries.put(b.getId(), b));
-			foundTemplates.forEach(e -> loadTemplate(e, new ResourceLocation(e.getNamespace(),
+			foundTemplates.forEach(e -> loadTemplate(e, new Identifier(e.getNamespace(),
 					String.format("%s/%s/%s/templates/%s.json", BookRegistry.BOOKS_LOCATION, bookName, DEFAULT_LANG, e.getPath()))));
 
 			categories.forEach((id, category) -> {
@@ -172,21 +171,19 @@ public class BookContents extends AbstractReadStateHolder {
 		}
 	}
 
-	protected void findFiles(String dir, List<ResourceLocation> list) {
-		IModInfo mod = book.owner;
-		if(mod instanceof ModInfo) {
-			String id = mod.getModId();
-			BookRegistry.findFiles((ModInfo) mod, String.format("data/%s/%s/%s/%s/%s", id, BookRegistry.BOOKS_LOCATION, book.id.getPath(), DEFAULT_LANG, dir), null, pred(id, list), false, false);
-		}
+	protected void findFiles(String dir, List<Identifier> list) {
+		ModContainer mod = book.owner;
+		String id = mod.getMetadata().getId();
+		BookRegistry.findFiles(mod, String.format("data/%s/%s/%s/%s/%s", id, BookRegistry.BOOKS_LOCATION, book.id.getPath(), DEFAULT_LANG, dir), null, pred(id, list), false, false);
 	}
 	
-	private BiFunction<Path, Path, Boolean> pred(String modId, List<ResourceLocation> list) {
+	private BiFunction<Path, Path, Boolean> pred(String modId, List<Identifier> list) {
 		return (root, file) -> {
 			Path rel = root.relativize(file);
 			String relName = rel.toString();
 			if(relName.endsWith(".json")) {
 				relName = FilenameUtils.removeExtension(FilenameUtils.separatorsToUnix(relName));
-				ResourceLocation res = new ResourceLocation(modId, relName);
+				Identifier res = new Identifier(modId, relName);
 				list.add(res);
 			}
 
@@ -194,7 +191,7 @@ public class BookContents extends AbstractReadStateHolder {
 		};
 	}
 
-	private void loadCategory(ResourceLocation key, ResourceLocation res, Book book) {
+	private void loadCategory(Identifier key, Identifier res, Book book) {
 		try (Reader stream = loadLocalizedJson(res)) {
 			BookCategory category = ClientBookRegistry.INSTANCE.gson.fromJson(stream, BookCategory.class);
 			if (category == null)
@@ -208,7 +205,7 @@ public class BookContents extends AbstractReadStateHolder {
 		}
 	}
 
-	private Optional<BookEntry> loadEntry(ResourceLocation id, ResourceLocation file, Book book) {
+	private Optional<BookEntry> loadEntry(Identifier id, Identifier file, Book book) {
 		try (Reader stream = loadLocalizedJson(file)) {
 			BookEntry entry = ClientBookRegistry.INSTANCE.gson.fromJson(stream, BookEntry.class);
 			if (entry == null)
@@ -233,7 +230,7 @@ public class BookContents extends AbstractReadStateHolder {
 		return Optional.empty();
 	}
 	
-	private void loadTemplate(ResourceLocation key, ResourceLocation res) {
+	private void loadTemplate(Identifier key, Identifier res) {
 		String json;
 		try (BufferedReader stream = loadLocalizedJson(res)) {
 			json = stream.lines().collect(Collectors.joining("\n"));
@@ -251,8 +248,8 @@ public class BookContents extends AbstractReadStateHolder {
 		templates.put(key, supplier);
 	}
 
-	private BufferedReader loadLocalizedJson(ResourceLocation res) {
-		ResourceLocation localized = new ResourceLocation(res.getNamespace(),
+	private BufferedReader loadLocalizedJson(Identifier res) {
+		Identifier localized = new Identifier(res.getNamespace(),
 				res.getPath().replaceAll(DEFAULT_LANG, ClientBookRegistry.INSTANCE.currentLang));
 
 		InputStream input = loadJson(localized, res);
@@ -262,17 +259,16 @@ public class BookContents extends AbstractReadStateHolder {
 		return new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
 	}
 
-	protected InputStream loadJson(ResourceLocation resloc, ResourceLocation fallback) {
-		String path = "/data/" + resloc.getNamespace() + "/" + resloc.getPath();
+	protected InputStream loadJson(Identifier resloc, Identifier fallback) {
+		String path = "data/" + resloc.getNamespace() + "/" + resloc.getPath();
 		Patchouli.LOGGER.debug("Loading {}", path);
-		
-		InputStream stream = book.ownerClass.getResourceAsStream(path);
-		if(stream != null)
-			return stream;
 
-		if(fallback != null) {
-			Patchouli.LOGGER.warn("Failed to load " + resloc + ". Switching to fallback.");
-			return loadJson(fallback, null);
+		try {
+			return Files.newInputStream(book.owner.getPath(path));
+		} catch (IOException ex) {
+			Patchouli.LOGGER.warn("Failed to load " + resloc + ".");
+			if (fallback != null)
+				return loadJson(fallback, null);
 		}
 
 		return null;

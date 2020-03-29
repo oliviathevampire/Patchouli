@@ -1,25 +1,18 @@
 package vazkii.patchouli.client.book.text;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.client.book.gui.GuiBookEntry;
-import vazkii.patchouli.client.handler.UnicodeFontHandler;
 import vazkii.patchouli.common.base.Patchouli;
 import vazkii.patchouli.common.book.Book;
 
 import javax.annotation.Nullable;
+import java.util.*;
 
 public class BookTextParser {
 	private static final Map<String, CommandProcessor> COMMANDS = new HashMap<>();
@@ -58,7 +51,7 @@ public class BookTextParser {
 			state.tooltip = "";
 			return "";
 		}, "/t");
-		register(state -> state.gui.getMinecraft().player.getDisplayName().getFormattedText(), "playername");
+		register(state -> state.gui.getMinecraft().player.getDisplayName().asFormattedString(), "playername");
 		register(state -> state.codes( "\u00A7k"), "k", "obf");
 		register(state -> state.codes("\u00A7l"), "l", "bold");
 		register(state -> state.codes("\u00A7m"), "m", "strike");
@@ -69,11 +62,11 @@ public class BookTextParser {
 		register((parameter, state) -> {
 			KeyBinding result = getKeybindKey(state, parameter);
 			if (result == null) {
-				state.tooltip = I18n.format("patchouli.gui.lexicon.keybind_missing", parameter);
+				state.tooltip = I18n.translate("patchouli.gui.lexicon.keybind_missing", parameter);
 				return "N/A";
 			}
 
-			state.tooltip = I18n.format("patchouli.gui.lexicon.keybind", I18n.format(result.getKeyDescription()));
+			state.tooltip = I18n.translate("patchouli.gui.lexicon.keybind", I18n.translate(result.getId()));
 			return result.getLocalizedName();
 		}, "k");
 		register((parameter, state) -> {
@@ -85,7 +78,7 @@ public class BookTextParser {
 
 			if (isExternal) {
 				String url = parameter;
-				state.tooltip = I18n.format("patchouli.gui.lexicon.external_link");
+				state.tooltip = I18n.translate("patchouli.gui.lexicon.external_link");
 				state.isExternalLink = true;
 				state.onClick = () -> {
 					GuiBook.openWebLink(url);
@@ -99,10 +92,10 @@ public class BookTextParser {
 					parameter = parameter.substring(0, hash);
 				}
 
-				ResourceLocation href = new ResourceLocation(state.book.getModNamespace(), parameter);
+				Identifier href = new Identifier(state.book.getModNamespace(), parameter);
 				BookEntry entry = state.book.contents.entries.get(href);
 				if(entry != null) {
-					state.tooltip = entry.isLocked() ? (TextFormatting.GRAY + I18n.format("patchouli.gui.lexicon.locked")) : entry.getName();
+					state.tooltip = entry.isLocked() ? (Formatting.GRAY + I18n.translate("patchouli.gui.lexicon.locked")) : entry.getName();
 					GuiBook gui = state.gui;
 					Book book = state.book;
 					int page = 0;
@@ -160,7 +153,7 @@ public class BookTextParser {
 	private final int x, y, width;
 	private final int lineHeight;
 	private final int baseColor;
-	private final FontRenderer font;
+	private final TextRenderer font;
 	private final int spaceWidth;
 
 	public BookTextParser(GuiBook gui, Book book, int x, int y, int width, int lineHeight, int baseColor) {
@@ -256,7 +249,7 @@ public class BookTextParser {
 		String result = "";
 
 		if (cmd.length() == 1 && cmd.matches("^[0123456789abcdef]$")) { // Vanilla colors
-			state.color = TextFormatting.fromFormattingCode(cmd.charAt(0)).getColor();
+			state.color = Formatting.byCode(cmd.charAt(0)).getColorValue();
 			return "";
 		}
 		else if(cmd.startsWith("#") && (cmd.length() == 4 || cmd.length() == 7)) { // Hex colors
@@ -278,7 +271,7 @@ public class BookTextParser {
 			state.lineBreaks = 1;
 			state.spacingLeft = pad;
 			state.spacingRight = spaceWidth;
-			return TextFormatting.BLACK.toString() + bullet;
+			return Formatting.BLACK.toString() + bullet;
 		}
 
 		if (cmd.indexOf(':') > 0) {
@@ -296,7 +289,7 @@ public class BookTextParser {
 		}
 
 		if(state.endingExternal)
-			result += TextFormatting.GRAY + "\u21AA";
+			result += Formatting.GRAY + "\u21AA";
 
 		return result;
 	}
@@ -304,9 +297,9 @@ public class BookTextParser {
 	private static KeyBinding getKeybindKey(SpanState state, String keybind) {
 		String alt = "key." + keybind;
 
-		KeyBinding[] keys = state.gui.getMinecraft().gameSettings.keyBindings;
+		KeyBinding[] keys = state.gui.getMinecraft().options.keysAll;
 		for(KeyBinding k : keys) {
-			String name = k.getKeyDescription();
+			String name = k.getId();
 			if(name.equals(keybind) || name.equals(alt))
 				return k;
 		}

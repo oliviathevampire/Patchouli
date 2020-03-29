@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.text.LiteralText;
 import vazkii.patchouli.client.book.BookCategory;
 import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.client.book.gui.button.GuiButtonCategory;
@@ -19,7 +19,7 @@ public class GuiBookCategory extends GuiBookEntryList {
 	BookCategory category;
 	
 	public GuiBookCategory(Book book, BookCategory category) {
-		super(book, new StringTextComponent(category.getName()));
+		super(book, new LiteralText(category.getName()));
 		this.category = category;
 	}
 
@@ -46,7 +46,7 @@ public class GuiBookCategory extends GuiBookEntryList {
 			int x = LEFT_PAGE_X + 10 + (i % 4) * 24;
 			int y = TOP_PADDING + PAGE_HEIGHT - (PatchouliConfig.disableAdvancementLocking.get() ? 46 : 68);
 			
-			Button button = new GuiButtonCategory(this, x, y, ocategory, this::handleButtonCategory);
+			ButtonWidget button = new GuiButtonCategory(this, x, y, ocategory, this::handleButtonCategory);
 			addButton(button);
 			dependentButtons.add(button);
 			
@@ -66,7 +66,7 @@ public class GuiBookCategory extends GuiBookEntryList {
 	
 	@Override
 	public boolean canBeOpened() {
-		return !category.isLocked() && !equals(Minecraft.getInstance().currentScreen);
+		return !category.isLocked() && !equals(MinecraftClient.getInstance().currentScreen);
 	}
 	
 }

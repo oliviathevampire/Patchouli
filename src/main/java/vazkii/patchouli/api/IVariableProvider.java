@@ -1,8 +1,5 @@
 package vazkii.patchouli.api;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-
 /**
  * A provider of variables to a template. Usually from json.
  */

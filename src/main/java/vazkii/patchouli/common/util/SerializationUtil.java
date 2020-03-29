@@ -11,13 +11,13 @@ import java.util.function.Supplier;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.common.base.Patchouli;
 
 public class SerializationUtil {
 
 	public static final Gson RAW_GSON = new GsonBuilder()
-			.registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
+			.registerTypeAdapter(Identifier.class, new Identifier.Serializer())
 			.create();
 	public static final Gson PRETTY_GSON = new GsonBuilder().setPrettyPrinting().create();
 

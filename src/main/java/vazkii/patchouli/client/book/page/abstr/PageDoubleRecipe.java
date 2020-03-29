@@ -3,16 +3,16 @@ package vazkii.patchouli.client.book.page.abstr;
 import com.google.gson.annotations.SerializedName;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.client.book.gui.GuiBook;
 
 public abstract class PageDoubleRecipe<T> extends PageWithText {
 
 	@SerializedName("recipe")
-	ResourceLocation recipeId;
+	Identifier recipeId;
 	@SerializedName("recipe2")
-	ResourceLocation recipe2Id;
+	Identifier recipe2Id;
 	String title;
 
 	protected transient T recipe1, recipe2;
@@ -31,10 +31,10 @@ public abstract class PageDoubleRecipe<T> extends PageWithText {
 		}
 		
 		boolean customTitle = title != null && !title.isEmpty();
-		title1 = !customTitle ? getRecipeOutput(recipe1).getDisplayName().getFormattedText() : title;
+		title1 = !customTitle ? getRecipeOutput(recipe1).getName().asFormattedString() : title;
 		title2 = "-";
 		if(recipe2 != null) {
-			title2 = !customTitle ? getRecipeOutput(recipe2).getDisplayName().getFormattedText() : "";
+			title2 = !customTitle ? getRecipeOutput(recipe2).getName().asFormattedString() : "";
 			if(title1.equals(title2))
 				title2 = "";
 		}
@@ -65,7 +65,7 @@ public abstract class PageDoubleRecipe<T> extends PageWithText {
 	}
 	
 	protected abstract void drawRecipe(T recipe, int recipeX, int recipeY, int mouseX, int mouseY, boolean second);
-	protected abstract T loadRecipe(BookEntry entry, ResourceLocation loc);
+	protected abstract T loadRecipe(BookEntry entry, Identifier loc);
 	protected abstract ItemStack getRecipeOutput(T recipe);
 	protected abstract int getRecipeHeight();
 	

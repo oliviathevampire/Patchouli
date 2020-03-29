@@ -1,19 +1,17 @@
 package vazkii.patchouli.client.book.page;
 
 import com.google.gson.annotations.SerializedName;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
-
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Vector3f;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.resources.I18n;
+
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
+import org.lwjgl.opengl.GL13;
 import vazkii.patchouli.client.base.ClientTicker;
 import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.client.book.gui.GuiBook;
@@ -73,7 +71,7 @@ public class PageEntity extends PageWithText {
 		parent.drawCenteredStringNoShadow(name, GuiBook.PAGE_WIDTH / 2, 0, book.headerColor);
 
 		if(errored)
-			fontRenderer.drawStringWithShadow(I18n.format("patchouli.gui.lexicon.loading_error"), 58, 60, 0xFF0000);
+			fontRenderer.drawWithShadow(I18n.translate("patchouli.gui.lexicon.loading_error"), 58, 60, 0xFF0000);
 
 		if(entity != null)
 			renderEntity(parent.getMinecraft().world, rotate ? ClientTicker.total : defaultRotation);
@@ -96,11 +94,11 @@ public class PageEntity extends PageWithText {
 		matrix.translate(0, offset, 0);
 		matrix.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(180));
 		matrix.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(rotation));
-		EntityRendererManager erd = Minecraft.getInstance().getRenderManager();
-		IRenderTypeBuffer.Impl immediate = Minecraft.getInstance().getBufferBuilders().getEntityVertexConsumers();
-		erd.setRenderShadow(false);
+		EntityRenderDispatcher erd = MinecraftClient.getInstance().getEntityRenderManager();
+		VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
+		erd.setRenderShadows(false);
 		erd.render(entity, 0, 0, 0, 0, 1, matrix, immediate, 0xF000F0);
-		erd.setRenderShadow(true);
+		erd.setRenderShadows(true);
 		immediate.draw();
 		RenderSystem.popMatrix();
 	}
@@ -122,7 +120,7 @@ public class PageEntity extends PageWithText {
 				offset = Math.max(height, entitySize) * 0.5F + extraOffset;
 
 				if(name == null || name.isEmpty())
-					name = entity.getName().getFormattedText();
+					name = entity.getName().asFormattedString();
 			} catch(Exception e) {
 				errored = true;
 				Patchouli.LOGGER.error("Failed to load entity", e);

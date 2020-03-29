@@ -19,7 +19,7 @@ public class ComponentCustomTest implements ICustomComponent {
 
 	@Override
 	public void render(IComponentRenderContext context, float pticks, int mouseX, int mouseY) {
-		context.getFont().drawStringWithShadow(text, x, y, 0);
+		context.getFont().drawWithShadow(text, x, y, 0);
 	}
 
 	@Override

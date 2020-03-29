@@ -1,19 +1,16 @@
 package vazkii.patchouli.client.book.gui.button;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SoundHandler;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.sound.SoundManager;
+import net.minecraft.util.Formatting;
 import vazkii.patchouli.client.base.ClientTicker;
 import vazkii.patchouli.client.book.BookCategory;
 import vazkii.patchouli.client.book.BookIcon;
 import vazkii.patchouli.client.book.gui.GuiBook;
 
-public class GuiButtonCategory extends Button {
+public class GuiButtonCategory extends ButtonWidget {
 
 	private static final int ANIM_TIME = 5;
 
@@ -24,12 +21,12 @@ public class GuiButtonCategory extends Button {
 	final int u, v;
 	float timeHovered;
 
-	public GuiButtonCategory(GuiBook parent, int x, int y, BookCategory category, Button.IPressable onPress) {
+	public GuiButtonCategory(GuiBook parent, int x, int y, BookCategory category, ButtonWidget.PressAction onPress) {
 		this(parent, x, y, category.getIcon(), category.getName(), onPress);
 		this.category = category;
 	}	
 
-	public GuiButtonCategory(GuiBook parent, int x, int y, BookIcon icon, String name, Button.IPressable onPress) {
+	public GuiButtonCategory(GuiBook parent, int x, int y, BookIcon icon, String name, ButtonWidget.PressAction onPress) {
 		super(parent.bookLeft + x, parent.bookTop + y, 20, 20, name, onPress);
 		this.parent = parent;
 		this.u = x;
@@ -66,13 +63,13 @@ public class GuiButtonCategory extends Button {
 				GuiBook.drawMarking(parent.book, x, y, 0, category.getReadState());
 			RenderSystem.popMatrix();
 
-			if(isHovered)
-				parent.setTooltip(locked ? (TextFormatting.GRAY + I18n.format("patchouli.gui.lexicon.locked")) : name);		
+			if(isHovered())
+				parent.setTooltip(locked ? (Formatting.GRAY + I18n.translate("patchouli.gui.lexicon.locked")) : name);
 		}
 	}
 
 	@Override
-	public void playDownSound(SoundHandler soundHandlerIn) {
+	public void playDownSound(SoundManager soundHandlerIn) {
 		if(category != null && !category.isLocked())
 			GuiBook.playBookFlipSound(parent.book);
 	}

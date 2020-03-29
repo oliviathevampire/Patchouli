@@ -1,4 +1,4 @@
-package vazkii.patchouli.common.book;
+1package vazkii.patchouli.common.book;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,17 +8,17 @@ import java.util.Map;
 
 import com.google.gson.annotations.SerializedName;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.FontManager;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.common.MinecraftForge;
-import vazkii.patchouli.api.BookContentsReloadEvent;
-import vazkii.patchouli.client.base.ClientAdvancements;
+import vazkii.patchouli.api.BookContentsReloadCallback;
 import vazkii.patchouli.client.book.BookContents;
 import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.client.book.ExternalBookContents;
@@ -30,7 +30,7 @@ import vazkii.patchouli.common.util.ItemStackUtil;
 
 public class Book {
 	
-	public static final ResourceLocation DEFAULT_MODEL = new ResourceLocation(Patchouli.MOD_ID, "book_brown");
+	public static final Identifier DEFAULT_MODEL = new Identifier(Patchouli.MOD_ID, "book_brown");
 
 	private static final Map<String, String> DEFAULT_MACROS = Util.make(() -> {
 		Map<String, String> ret = new HashMap<>();
@@ -47,9 +47,8 @@ public class Book {
 
 	private transient boolean wasUpdated = false;
 	
-	public transient IModInfo owner;
-	public transient Class<?> ownerClass;
-	public transient ResourceLocation id;
+	public transient ModContainer owner;
+	public transient Identifier id;
 	private transient ItemStack bookItem;
 	
 	public transient int textColor, headerColor, nameplateColor, linkColor, linkHoverColor, progressBarColor, progressBarBackground;
@@ -67,15 +66,15 @@ public class Book {
 	public String landingText = "patchouli.gui.lexicon.landing_info";
 
 	@SerializedName("book_texture")
-	public ResourceLocation bookTexture = new ResourceLocation(Patchouli.MOD_ID, "textures/gui/book_brown.png");
+	public Identifier bookTexture = new Identifier(Patchouli.MOD_ID, "textures/gui/book_brown.png");
 
 	@SerializedName("filler_texture")
-	public ResourceLocation fillerTexture = new ResourceLocation(Patchouli.MOD_ID, "textures/gui/page_filler.png");
+	public Identifier fillerTexture = new Identifier(Patchouli.MOD_ID, "textures/gui/page_filler.png");
 
 	@SerializedName("crafting_texture")
-	public ResourceLocation craftingTexture = new ResourceLocation(Patchouli.MOD_ID, "textures/gui/crafting.png");
+	public Identifier craftingTexture = new Identifier(Patchouli.MOD_ID, "textures/gui/crafting.png");
 
-	public ResourceLocation model = DEFAULT_MODEL;
+	public Identifier model = DEFAULT_MODEL;
 
 	@SerializedName("text_color")
 	public String textColorRaw = "000000";
@@ -97,10 +96,10 @@ public class Book {
 	public String progressBarBackgroundRaw = "DDDDDD";
 	
 	@SerializedName("open_sound")
-	public ResourceLocation openSound = new ResourceLocation(Patchouli.MOD_ID, "book_open");
+	public Identifier openSound = new Identifier(Patchouli.MOD_ID, "book_open");
 
 	@SerializedName("flip_sound")
-	public ResourceLocation flipSound = new ResourceLocation(Patchouli.MOD_ID, "book_flip");
+	public Identifier flipSound = new Identifier(Patchouli.MOD_ID, "book_flip");
 	
 	@SerializedName("show_progress")
 	public boolean showProgress = true;
@@ -115,7 +114,7 @@ public class Book {
 	public String creativeTab = "misc";
 
 	@SerializedName("advancements_tab")
-	public ResourceLocation advancementsTab;
+	public Identifier advancementsTab;
 	
 	@SerializedName("dont_generate_book")
 	public boolean noBook = false;
@@ -127,7 +126,7 @@ public class Book {
 	public boolean showToasts = true;
 	
 	@SerializedName("extend")
-	public ResourceLocation extend;
+	public Identifier extend;
 
 	@SerializedName("allow_extensions")
 	public boolean allowExtensions = true;
@@ -136,9 +135,8 @@ public class Book {
 	
 	public Map<String, String> macros = new HashMap<>();
 	
-	public void build(IModInfo owner,  Class<?> ownerClass, ResourceLocation resource, boolean external) {
+	public void build(ModContainer owner, Identifier resource, boolean external) {
 		this.owner = owner;
-		this.ownerClass = ownerClass;
 		this.id = resource;
 		this.isExternal = external;
 		
@@ -173,7 +171,7 @@ public class Book {
 		return bookItem;
 	}
 	
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public void markUpdated() {
 		wasUpdated = true;
 	}
@@ -184,7 +182,7 @@ public class Book {
 		return updated;
 	}
 	
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public void reloadContentsAndExtensions() {
 		reloadContents();
 
@@ -192,23 +190,23 @@ public class Book {
 			b.reloadExtensionContents();
 	}
 	
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public void reloadContents() {
 		if(contents == null)
 			contents = isExternal ? new ExternalBookContents(this) : new BookContents(this);
 	
 		if(!isExtension) {
 			contents.reload(false);
-			MinecraftForge.EVENT_BUS.post(new BookContentsReloadEvent(this.id));
+			BookContentsReloadCallback.EVENT.invoker().trigger(this.id);
 		}
 	}
 	
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public void reloadExtensionContents() {
 		if(isExtension) {
 			if(extensionTarget == null) {
 				extensionTarget = BookRegistry.INSTANCE.books.get(extend);
-				
+
 				if(extensionTarget == null)
 					throw new IllegalArgumentException("Extension Book " + id + " has no valid target");
 				else if(!extensionTarget.allowExtensions)
@@ -223,12 +221,12 @@ public class Book {
 			}
 			
 			contents.reload(true);
-			MinecraftForge.EVENT_BUS.post(new BookContentsReloadEvent(id));
+			BookContentsReloadCallback.EVENT.invoker().trigger(this.id);
 		}
 	}
 	
-	@OnlyIn(Dist.CLIENT)
-	public void reloadLocks(boolean suppressToasts) {
+	@Environment(EnvType.CLIENT)
+	public void reloadLocks(boolean reset) {
 		contents.entries.values().forEach(BookEntry::updateLockStatus);
 		contents.categories.values().forEach(c -> c.updateLockStatus(true));
 
@@ -239,12 +237,12 @@ public class Book {
 	}
 	
 	public String getOwnerName() {
-		return owner.getDisplayName();
+		return owner.getMetadata().getName();
 	}
 	
-	@OnlyIn(Dist.CLIENT)
-	public FontRenderer getFont() {
-		return useBlockyFont ? Minecraft.getInstance().fontRenderer : UnicodeFontHandler.getUnicodeFont();
+	@Environment(EnvType.CLIENT)
+	public TextRenderer getFont() {
+		return useBlockyFont ? MinecraftClient.getInstance().textRenderer : UnicodeFontHandler.getUnicodeFont();
 	}
 	
 }

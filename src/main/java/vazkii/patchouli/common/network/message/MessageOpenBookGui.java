@@ -1,37 +1,28 @@
 package vazkii.patchouli.common.network.message;
 
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.network.PacketContext;
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.ClientBookRegistry;
-
-import java.util.function.Supplier;
+import vazkii.patchouli.common.base.Patchouli;
 
 public class MessageOpenBookGui {
+	public static final Identifier ID = new Identifier(Patchouli.MOD_ID, "open_book");
 
-	public final ResourceLocation book;
-	
-	public MessageOpenBookGui(PacketBuffer buf) {
-		book = buf.readResourceLocation();
+	public static void send(PlayerEntity player, Identifier book) {
+		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+		buf.writeIdentifier(book);
+		ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, ID, buf);
 	}
 	
-	public MessageOpenBookGui(ResourceLocation book) {
-		this.book = book;
-	}
-
-	public void encode(PacketBuffer buf) {
-		buf.writeResourceLocation(book);
-	}
-	
-	public boolean receive(Supplier<Context> context) {
-		if (context.get().getDirection().getReceptionSide().isClient()) {
-			context.get().enqueueWork(() -> {
-				ClientBookRegistry.INSTANCE.displayBookGui(book);
-			});
-
-			return true;
-		}
-		return false;
+	public static void handle(PacketContext context, PacketByteBuf buf) {
+		Identifier book = buf.readIdentifier();
+		context.getTaskQueue().submit(() -> {
+			ClientBookRegistry.INSTANCE.displayBookGui(book);
+		});
 	}
 
 }

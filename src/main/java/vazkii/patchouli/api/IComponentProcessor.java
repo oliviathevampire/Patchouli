@@ -1,8 +1,6 @@
 package vazkii.patchouli.api;
 
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * Implement this on a class designed to process a template and the variables bound 

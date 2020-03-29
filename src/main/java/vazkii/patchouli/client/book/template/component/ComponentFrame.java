@@ -1,6 +1,6 @@
 package vazkii.patchouli.client.book.template.component;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import vazkii.patchouli.client.book.BookEntry;

@@ -1,11 +1,10 @@
 package vazkii.patchouli.client.book.page;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.ResourceLocation;
+
+import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.client.book.gui.GuiBookEntry;
 import vazkii.patchouli.client.book.gui.button.GuiButtonBookArrowSmall;
@@ -13,7 +12,7 @@ import vazkii.patchouli.client.book.page.abstr.PageWithText;
 
 public class PageImage extends PageWithText {
 
-	ResourceLocation[] images;
+	Identifier[] images;
 	String title;
 	boolean border;
 
@@ -23,6 +22,7 @@ public class PageImage extends PageWithText {
 	public void onDisplayed(GuiBookEntry parent, int left, int top) {
 		super.onDisplayed(parent, left, top);
 		
+
 		int x = 90;
 		int y = 100;
 		addButton(new GuiButtonBookArrowSmall(parent, x, y, true, () -> index > 0, this::handleButtonArrow));
@@ -31,14 +31,14 @@ public class PageImage extends PageWithText {
 	
 	@Override
 	public void render(int mouseX, int mouseY, float pticks) {
-		mc.textureManager.bindTexture(images[index]);
-		
+		mc.getTextureManager().bindTexture(images[index]);
+
 		int x = GuiBook.PAGE_WIDTH / 2 - 53;
 		int y = 7;
 		RenderSystem.color3f(1F, 1F, 1F);
 		RenderSystem.enableBlend();
 		RenderSystem.scalef(0.5F, 0.5F, 0.5F);
-		parent.blit(x * 2 + 6, y * 2 + 6, 0, 0, 200, 200);
+		parent.drawTexture(x * 2 + 6, y * 2 + 6, 0, 0, 200, 200);
 		RenderSystem.scalef(2F, 2F, 2F);
 
 		if(border)
@@ -50,14 +50,14 @@ public class PageImage extends PageWithText {
 		if(images.length > 1 && border) {
 			int xs = x + 83;
 			int ys = y + 92;
-			AbstractGui.fill(xs, ys, xs + 20, ys + 11, 0x44000000);
-			AbstractGui.fill(xs - 1, ys - 1, xs + 20, ys + 11, 0x44000000);
+			DrawableHelper.fill(xs, ys, xs + 20, ys + 11, 0x44000000);
+			DrawableHelper.fill(xs - 1, ys - 1, xs + 20, ys + 11, 0x44000000);
 		}
 		
 		super.render(mouseX, mouseY, pticks);
 	}
 	
-	public void handleButtonArrow(Button button) {
+	public void handleButtonArrow(ButtonWidget button) {
 		boolean left = ((GuiButtonBookArrowSmall) button).left;
 		if(left)
 			index--;

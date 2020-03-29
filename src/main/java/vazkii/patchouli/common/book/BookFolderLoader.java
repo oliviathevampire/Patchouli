@@ -5,10 +5,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.ResourceLocationException;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.forgespi.language.IModInfo;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
 import vazkii.patchouli.common.base.Patchouli;
 
 public class BookFolderLoader {
@@ -26,8 +26,8 @@ public class BookFolderLoader {
 	public static void findBooks() {
 		if(loadDir == null)
 			setup();
-		
-		IModInfo mod = ModLoadingContext.get().getActiveContainer().getModInfo();
+
+		ModContainer self = FabricLoader.getInstance().getModContainer(Patchouli.MOD_ID).get();
 		File[] subdirs = loadDir.listFiles(File::isDirectory);
 		if (subdirs == null) {
 			Patchouli.LOGGER.warn("Failed to list external books in {}, not loading external books",
@@ -36,17 +36,17 @@ public class BookFolderLoader {
 		}
 
 		for(File dir : subdirs) {
-			ResourceLocation res;
+			Identifier res;
 			try {
-				res = new ResourceLocation(Patchouli.MOD_ID, dir.getName());
-			} catch (ResourceLocationException ex) {
+				res = new Identifier(Patchouli.MOD_ID, dir.getName());
+			} catch (InvalidIdentifierException ex) {
 				Patchouli.LOGGER.error("Invalid external book folder name {}, skipping", dir.getName(), ex);
 				continue;
 			}
 
 			File bookJson = new File(dir, "book.json");
 			try (FileInputStream stream = new FileInputStream(bookJson)) {
-				BookRegistry.INSTANCE.loadBook(mod, Patchouli.class, res, stream, true);
+				BookRegistry.INSTANCE.loadBook(self, res, stream, true);
 			} catch (Exception e) {
 				Patchouli.LOGGER.error("Failed to load external book json from {}, skipping", bookJson, e);
 			}

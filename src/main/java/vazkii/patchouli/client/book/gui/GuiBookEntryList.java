@@ -1,23 +1,20 @@
 package vazkii.patchouli.client.book.gui;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import com.mojang.blaze3d.platform.GlStateManager;
-
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.client.book.gui.button.GuiButtonCategory;
 import vazkii.patchouli.client.book.gui.button.GuiButtonEntry;
 import vazkii.patchouli.common.book.Book;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class GuiBookEntryList extends GuiBook {
 
@@ -26,13 +23,13 @@ public abstract class GuiBookEntryList extends GuiBook {
 	
 	BookTextRenderer text;
 	
-	List<Button> dependentButtons;
+	List<ButtonWidget> dependentButtons;
 	List<BookEntry> allEntries;
 	List<BookEntry> visibleEntries;
 	
 	TextFieldWidget searchField;
 
-	public GuiBookEntryList(Book book, ITextComponent title) {
+	public GuiBookEntryList(Book book, Text title) {
 		super(book, title);
 	}
 	
@@ -48,10 +45,10 @@ public abstract class GuiBookEntryList extends GuiBook {
 		if(shouldSortEntryList())
 			Collections.sort(allEntries);
 		
-		searchField = new TextFieldWidget(font, 160, 170, 90, 12, "");
-		searchField.setMaxStringLength(32);
-		searchField.setEnableBackgroundDrawing(false);
-		searchField.setCanLoseFocus(false);
+		searchField = new TextFieldWidget(textRenderer, 160, 170, 90, 12, "");
+		searchField.setMaxLength(32);
+		searchField.setHasBorder(false);
+		searchField.setFocusUnlocked(false);
 		searchField.changeFocus(true);
 		
 		dependentButtons = new ArrayList<>();
@@ -82,8 +79,8 @@ public abstract class GuiBookEntryList extends GuiBook {
 		super.drawForegroundElements(mouseX, mouseY, partialTicks);
 		
 		if(page == 0) {
-			drawCenteredStringNoShadow(getTitle().getFormattedText(), LEFT_PAGE_X + PAGE_WIDTH / 2, TOP_PADDING, book.headerColor);
-			drawCenteredStringNoShadow(I18n.format("patchouli.gui.lexicon.chapters"), RIGHT_PAGE_X + PAGE_WIDTH / 2, TOP_PADDING, book.headerColor);
+			drawCenteredStringNoShadow(getTitle().asFormattedString(), LEFT_PAGE_X + PAGE_WIDTH / 2, TOP_PADDING, book.headerColor);
+			drawCenteredStringNoShadow(I18n.translate("patchouli.gui.lexicon.chapters"), RIGHT_PAGE_X + PAGE_WIDTH / 2, TOP_PADDING, book.headerColor);
 
 			drawSeparator(book, LEFT_PAGE_X, TOP_PADDING + 12);
 			drawSeparator(book, RIGHT_PAGE_X, TOP_PADDING + 12);
@@ -97,13 +94,13 @@ public abstract class GuiBookEntryList extends GuiBook {
 		if(!searchField.getText().isEmpty()) {
 			RenderSystem.color4f(1F, 1F, 1F, 1F);
 			drawFromTexture(book, searchField.x - 8, searchField.y, 140, 183, 99, 14);
-			book.getFont().drawString(searchField.getText(), searchField.x + 7, searchField.y + 1, 0);
+			book.getFont().draw(searchField.getText(), searchField.x + 7, searchField.y + 1, 0);
 		}
 		
 		if(visibleEntries.isEmpty()) {
-			drawCenteredStringNoShadow(I18n.format("patchouli.gui.lexicon.no_results"), GuiBook.RIGHT_PAGE_X + GuiBook.PAGE_WIDTH / 2, 80, 0x333333);
+			drawCenteredStringNoShadow(I18n.translate("patchouli.gui.lexicon.no_results"), GuiBook.RIGHT_PAGE_X + GuiBook.PAGE_WIDTH / 2, 80, 0x333333);
 			RenderSystem.scalef(2F, 2F, 2F);
-			drawCenteredStringNoShadow(I18n.format("patchouli.gui.lexicon.sad"), GuiBook.RIGHT_PAGE_X / 2 + GuiBook.PAGE_WIDTH / 4, 47, 0x999999);
+			drawCenteredStringNoShadow(I18n.translate("patchouli.gui.lexicon.sad"), GuiBook.RIGHT_PAGE_X / 2 + GuiBook.PAGE_WIDTH / 4, 47, 0x999999);
 			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
 		}
 	}
@@ -147,11 +144,11 @@ public abstract class GuiBookEntryList extends GuiBook {
 		return super.keyPressed(key, scanCode, modifiers);
 	}
 	
-	public void handleButtonCategory(Button button) {
+	public void handleButtonCategory(ButtonWidget button) {
 		displayLexiconGui(new GuiBookCategory(book, ((GuiButtonCategory) button).getCategory()), true);
 	}
 	
-	public void handleButtonEntry(Button button) {
+	public void handleButtonEntry(ButtonWidget button) {
 		GuiBookEntry.displayOrBookmark(this, ((GuiButtonEntry) button).getEntry());
 	}
 	
@@ -198,7 +195,7 @@ public abstract class GuiBookEntryList extends GuiBook {
 	
 	void addEntryButtons(int x, int y, int start, int count) {
 		for(int i = 0; i < count && (i + start) < visibleEntries.size(); i++) {
-			Button button = new GuiButtonEntry(this, bookLeft + x, bookTop + y + i * 11, visibleEntries.get(start + i), this::handleButtonEntry);
+			ButtonWidget button = new GuiButtonEntry(this, bookLeft + x, bookTop + y + i * 11, visibleEntries.get(start + i), this::handleButtonEntry);
 			addButton(button);
 			dependentButtons.add(button);
 		}

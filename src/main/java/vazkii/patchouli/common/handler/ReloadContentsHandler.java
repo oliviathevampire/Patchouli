@@ -1,20 +1,35 @@
 package vazkii.patchouli.common.handler;
 
-import net.minecraft.resources.IResourceManagerReloadListener;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.fabricmc.fabric.api.event.server.ServerStartCallback;
+import net.minecraft.resource.SynchronousResourceReloadListener;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import vazkii.patchouli.common.base.Patchouli;
 import vazkii.patchouli.common.network.NetworkHandler;
 import vazkii.patchouli.common.network.message.MessageReloadBookContents;
 
-@Mod.EventBusSubscriber(modid = Patchouli.MOD_ID)
 public class ReloadContentsHandler {
-    @SubscribeEvent
-    public static void serverStart(FMLServerStartingEvent evt) {
+    /*
+     We want to reload contents only when all mods are done syncing all of their "datapack stuff" like custom recipes
+     Because books could have custom entries that read such recipes
+     So use lowest priority and explicitly tell the client when to do it
+    */
+    public static void playerLogin(ServerPlayerEntity player) {
+        MessageReloadBookContents.send(player);
+        AdvancementSyncHandler.loginSync(player);
+    }
+
+    public static void init() {
+        ServerStartCallback.EVENT.register(ReloadContentsHandler::serverStart);
+    }
+
+    private static void serverStart(MinecraftServer server) {
         // Also reload contents when someone types /reload
-        @SuppressWarnings("deprecation")
-        IResourceManagerReloadListener listener = m -> NetworkHandler.sendToAll(new MessageReloadBookContents());
-        evt.getServer().getResourceManager().addReloadListener(listener);
+        SynchronousResourceReloadListener listener = m -> MessageReloadBookContents.sendToAll(server);
+        server.getDataManager().registerListener(listener);
+
+        // New advancements could show up, so recompute synced advancements each /reload too
+        SynchronousResourceReloadListener advListener = m -> AdvancementSyncHandler.recomputeSyncedAdvancements(server);
+        server.getDataManager().registerListener(advListener);
     }
 }

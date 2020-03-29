@@ -1,10 +1,9 @@
 package vazkii.patchouli.client.book.page;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.ResourceLocation;
+
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.client.book.page.abstr.PageWithText;
 
@@ -31,12 +30,12 @@ public class PageText extends PageWithText {
 			boolean renderedSmol = false;
 			String smolText = "";
 			
-			if(mc.gameSettings.advancedItemTooltips) {
-				ResourceLocation res = parent.getEntry().getId();
+			if(mc.options.advancedItemTooltips) {
+				Identifier res = parent.getEntry().getId();
 				smolText = res.toString();
 			} else if(entry.isExtension()) {
 				String name = entry.getTrueProvider().getOwnerName();
-				smolText = I18n.format("patchouli.gui.lexicon.added_by", name);
+				smolText = I18n.translate("patchouli.gui.lexicon.added_by", name);
 			}
 
 			if(!smolText.isEmpty()) {

@@ -13,10 +13,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.page.PageCrafting;
 import vazkii.patchouli.client.book.page.PageEmpty;
 import vazkii.patchouli.client.book.page.PageEntity;
@@ -72,7 +70,7 @@ public class ClientBookRegistry {
 	}
 
 	public void reload() {
-		currentLang = Minecraft.getInstance().getLanguageManager().getCurrentLanguage().getCode();
+		currentLang = MinecraftClient.getInstance().getLanguageManager().getLanguage().getCode();
 		if(firstLoad)
 			/* preload to avoid lag spike when opening book. This happens in the first reload when logging
 			   in, so the user shouldn't notice it as much. */
@@ -85,12 +83,11 @@ public class ClientBookRegistry {
 		BookRegistry.INSTANCE.books.values().forEach(b -> b.reloadLocks(suppressToasts));
 	}
 	
-	public void displayBookGui(ResourceLocation bookStr) {
-		Minecraft mc = Minecraft.getInstance();
-		currentLang = mc.getLanguageManager().getCurrentLanguage().getCode();
+	public void displayBookGui(Identifier bookStr) {
+		currentLang = MinecraftClient.getInstance().getLanguageManager().getLanguage().getCode();
 		
 		Book book = BookRegistry.INSTANCE.books.get(bookStr);
-		
+
 		if(book != null) {
 			if (!book.contents.getCurrentGui().canBeOpened()) {
 				book.contents.currentGui = null;
