@@ -8,7 +8,9 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
 import vazkii.patchouli.client.book.ClientBookRegistry;
+import vazkii.patchouli.common.base.PatchouliConfig;
 import vazkii.patchouli.common.book.Book;
+import vazkii.patchouli.common.book.BookRegistry;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,20 +40,7 @@ public class ClientAdvancements {
 	}
 
 	public static boolean hasDone(String advancement) {
-		ResourceLocation id = ResourceLocation.tryCreate(advancement);
-		if (id != null) {
-			ClientPlayNetHandler conn = Minecraft.getInstance().getConnection();
-			if (conn != null) {
-				ClientAdvancementManager cm = conn.getAdvancementManager();
-				Advancement adv = cm.getAdvancementList().getAdvancement(id);
-				if (adv != null) {
-					Map<Advancement, AdvancementProgress> progressMap = ObfuscationReflectionHelper.getPrivateValue(ClientAdvancementManager.class, cm, "field_192803_d");
-					AdvancementProgress progress = progressMap.get(adv);
-					return progress != null && progress.isDone();
-				}
-			}
-		}
-		return false;
+		return doneAdvancements != null && doneAdvancements.contains(advancement);
 	}
 
 	public static void init() {

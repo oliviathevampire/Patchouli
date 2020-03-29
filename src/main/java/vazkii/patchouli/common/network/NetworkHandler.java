@@ -13,6 +13,7 @@ package vazkii.patchouli.common.network;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import vazkii.patchouli.common.network.message.MessageOpenBookGui;
 import vazkii.patchouli.common.network.message.MessageReloadBookContents;
+import vazkii.patchouli.common.network.message.MessageSyncAdvancements;
 
 public class NetworkHandler {
 

@@ -40,7 +40,7 @@ public class BookRightClickHandler {
 			if(book != null) {
 				Pair<BookEntry, Integer> hover = getHoveredEntry(book);
 				if(hover != null) {
-					BookEntry entry = hover.getFirst();
+					BookEntry entry = hover.getLeft();
 					if(!entry.isLocked()) {
 						Window window = mc.getWindow();
 						int x = window.getScaledWidth() / 2 + 3;
@@ -100,7 +100,7 @@ public class BookRightClickHandler {
 		return ActionResult.PASS;
 	}
 
-	public static Book getBookFromStack(ItemStack stack) {
+	private static Book getBookFromStack(ItemStack stack) {
 		if(stack.getItem() instanceof ItemModBook)
 			return ItemModBook.getBook(stack);
 
@@ -110,22 +110,6 @@ public class BookRightClickHandler {
 				return b;
 
 		return null;
-	}
-
-	public static void setOpenedEntry(PlayerEntity player, Hand hand, BookEntry entry, int page) {
-		if(!entry.isLocked()) {
-			GuiBook curr = entry.getBook().contents.getCurrentGui();
-			entry.getBook().contents.currentGui = new GuiBookEntry(entry.getBook(), entry, page);
-			player.swingArm(hand);
-
-			if(curr instanceof GuiBookEntry) {
-				GuiBookEntry currEntry = (GuiBookEntry) curr;
-				if(currEntry.getEntry() == entry && currEntry.getPage() == page)
-					return;
-			}
-
-			entry.getBook().contents.guiStack.push(curr);
-		}
 	}
 
 	private static Pair<BookEntry, Integer> getHoveredEntry(Book book) {

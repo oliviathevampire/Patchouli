@@ -264,7 +264,7 @@ public abstract class GuiBook extends Screen {
 		switch(mouseButton) {
 		case GLFW.GLFW_MOUSE_BUTTON_LEFT:
 			if(targetPage != null && hasShiftDown()) {
-				displayLexiconGui(new GuiBookEntry(book, targetPage.getFirst(), targetPage.getSecond()), true);
+				displayLexiconGui(new GuiBookEntry(book, targetPage.getLeft(), targetPage.getRight()), true);
 				playBookFlipSound(book);
 				return true;
 			}

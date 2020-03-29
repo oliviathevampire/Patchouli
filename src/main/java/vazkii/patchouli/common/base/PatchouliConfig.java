@@ -55,18 +55,6 @@ public class PatchouliConfig {
 	}
  	*/
 
-	static class ClientLoader {
-		public ClientLoader(ForgeConfigSpec.Builder builder) {
-			builder.push("client");
-
-			useShiftForQuickLookup = builder
-					.comment("Set this to true to use Shift instead of Ctrl for the inventory quick lookup feature.")
-					.define("quickLookupShift", false);
-
-			builder.pop();
-		}
-	}
-
 	private static void updateFlags() {
 		setFlag("advancements_disabled", disableAdvancementLocking.get());
 		setFlag("testing_mode", testingMode.get());

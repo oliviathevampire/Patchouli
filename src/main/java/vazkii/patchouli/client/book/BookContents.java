@@ -27,6 +27,7 @@ import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;

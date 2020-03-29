@@ -30,7 +30,6 @@ import vazkii.patchouli.client.book.page.PageText;
 import vazkii.patchouli.client.book.template.BookTemplate;
 import vazkii.patchouli.client.book.template.TemplateComponent;
 import vazkii.patchouli.client.handler.UnicodeFontHandler;
-import vazkii.patchouli.common.base.PatchouliSounds;
 import vazkii.patchouli.common.book.Book;
 import vazkii.patchouli.common.book.BookRegistry;
 import vazkii.patchouli.common.util.SerializationUtil;
@@ -79,8 +78,8 @@ public class ClientBookRegistry {
 		BookRegistry.INSTANCE.reloadContents();
 	}
 	
-	public void reloadLocks(boolean suppressToasts) {
-		BookRegistry.INSTANCE.books.values().forEach(b -> b.reloadLocks(suppressToasts));
+	public void reloadLocks(boolean reset) {
+		BookRegistry.INSTANCE.books.values().forEach(b -> b.reloadLocks(reset));
 	}
 	
 	public void displayBookGui(Identifier bookStr) {
@@ -95,11 +94,6 @@ public class ClientBookRegistry {
 			}
 
 			book.contents.openLexiconGui(book.contents.getCurrentGui(), false);
-
-			if (mc.player != null) {
-				SoundEvent sfx = PatchouliSounds.getSound(book.openSound, PatchouliSounds.book_open);
-				mc.player.playSound(sfx, 1F, (float) (0.7 + Math.random() * 0.4));
-			}
 		}
 	}
 
