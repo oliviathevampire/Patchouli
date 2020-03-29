@@ -368,7 +368,7 @@ public class MultiblockVisualizationHandler {
 		private static Map<RenderLayer, RenderLayer> remappedTypes = new IdentityHashMap<>();
 
 		private GhostRenderLayer(RenderLayer original) {
-			super(String.format("%s_%s_ghost", original.toString(), Patchouli.MOD_ID), original.getVertexFormat(), original.getDrawMode(), original.getExpectedBufferSize(), original.method_23037(), true, () -> {
+			super(String.format("%s_%s_ghost", original.toString(), Patchouli.MOD_ID), original.getVertexFormat(), original.getDrawMode(), original.getExpectedBufferSize(), original.hasCrumbling(), true, () -> {
 				original.startDrawing();
 
 				// Alter GL state

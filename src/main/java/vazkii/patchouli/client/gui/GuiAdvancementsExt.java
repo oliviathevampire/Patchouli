@@ -22,8 +22,8 @@ public class GuiAdvancementsExt extends AdvancementsScreen {
 
 	@Override
     public boolean keyPressed(int key, int scanCode, int modifiers) {
-        if(minecraft.options.keyAdvancements.matchesKey(key, scanCode)) {
-            minecraft.openScreen(parent);
+        if(client.options.keyAdvancements.matchesKey(key, scanCode)) {
+            client.openScreen(parent);
             return true;
         }
         else return super.keyPressed(key, scanCode, modifiers);

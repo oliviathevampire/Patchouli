@@ -1,25 +1,18 @@
 package vazkii.patchouli.client.book.text;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.TextFormat;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.client.book.gui.GuiBookEntry;
-import vazkii.patchouli.client.handler.UnicodeFontHandler;
 import vazkii.patchouli.common.base.Patchouli;
 import vazkii.patchouli.common.book.Book;
 
 import javax.annotation.Nullable;
+import java.util.*;
 
 public class BookTextParser {
 	private static final Map<String, CommandProcessor> COMMANDS = new HashMap<>();
@@ -102,7 +95,7 @@ public class BookTextParser {
 				Identifier href = new Identifier(state.book.getModNamespace(), parameter);
 				BookEntry entry = state.book.contents.entries.get(href);
 				if(entry != null) {
-					state.tooltip = entry.isLocked() ? (TextFormat.GRAY + I18n.translate("patchouli.gui.lexicon.locked")) : entry.getName();
+					state.tooltip = entry.isLocked() ? (Formatting.GRAY + I18n.translate("patchouli.gui.lexicon.locked")) : entry.getName();
 					GuiBook gui = state.gui;
 					Book book = state.book;
 					int page = 0;
@@ -278,7 +271,7 @@ public class BookTextParser {
 			state.lineBreaks = 1;
 			state.spacingLeft = pad;
 			state.spacingRight = spaceWidth;
-			return TextFormat.BLACK.toString() + bullet;
+			return Formatting.BLACK.toString() + bullet;
 		}
 
 		if (cmd.indexOf(':') > 0) {
@@ -296,7 +289,7 @@ public class BookTextParser {
 		}
 
 		if(state.endingExternal)
-			result += TextFormat.GRAY + "\u21AA";
+			result += Formatting.GRAY + "\u21AA";
 
 		return result;
 	}

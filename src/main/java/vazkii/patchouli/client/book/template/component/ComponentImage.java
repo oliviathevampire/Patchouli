@@ -50,7 +50,7 @@ public class ComponentImage extends TemplateComponent {
 		RenderSystem.scalef(scale, scale, scale);
 		RenderSystem.color4f(1F, 1F, 1F, 1F);
 		RenderSystem.enableBlend();
-		DrawableHelper.blit(0, 0, u, v, width, height, textureWidth, textureHeight);
+		DrawableHelper.drawTexture(0, 0, u, v, width, height, textureWidth, textureHeight);
 		RenderSystem.popMatrix();
 	}
 

@@ -32,7 +32,7 @@ public class GuiButtonInventoryBook extends ButtonWidget {
 		RenderSystem.color3f(1F, 1F, 1F);
 		
 		boolean hovered = mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
-		DrawableHelper.blit(x, y, (hovered ? 20 : 0), 0, width, height, 64, 64);
+		DrawableHelper.drawTexture(x, y, (hovered ? 20 : 0), 0, width, height, 64, 64);
 		
 		ItemStack stack = book.getBookItem();
 		mc.getItemRenderer().renderGuiItem(stack, x + 2, y + 2);

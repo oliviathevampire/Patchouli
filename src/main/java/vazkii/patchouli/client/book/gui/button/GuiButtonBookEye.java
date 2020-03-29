@@ -2,7 +2,7 @@ package vazkii.patchouli.client.book.gui.button;
 
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.TextFormat;
+import net.minecraft.util.Formatting;
 import vazkii.patchouli.client.base.ClientTicker;
 import vazkii.patchouli.client.base.PersistentData;
 import vazkii.patchouli.client.book.gui.GuiBook;
@@ -12,7 +12,7 @@ public class GuiButtonBookEye extends GuiButtonBook {
 	public GuiButtonBookEye(GuiBook parent, int x, int y, ButtonWidget.PressAction onPress) {
 		super(parent, x, y, 308, 31, 11, 11, onPress,
 				I18n.translate("patchouli.gui.lexicon.button.visualize"),
-				TextFormat.GRAY + I18n.translate("patchouli.gui.lexicon.button.visualize.info"));
+				Formatting.GRAY + I18n.translate("patchouli.gui.lexicon.button.visualize.info"));
 	}
 	
 	@Override

@@ -10,6 +10,7 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.BlockView;
@@ -153,6 +154,11 @@ public abstract class AbstractMultiblock implements IMultiblock, BlockRenderView
 
     @Override
     public int getLightLevel(LightType type, BlockPos pos) {
+        return 15;
+    }
+
+    @Override
+    public float getBrightness(Direction direction, boolean shaded) {
         return 15;
     }
 

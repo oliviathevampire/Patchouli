@@ -46,7 +46,7 @@ public class ComponentItemStack extends TemplateComponent {
 			RenderSystem.enableBlend();
 			RenderSystem.color4f(1F, 1F, 1F, 1F);
 			page.mc.getTextureManager().bindTexture(page.book.craftingTexture);
-			DrawableHelper.blit(x - 4, y - 4, 83, 71, 24, 24, 128, 128);
+			DrawableHelper.drawTexture(x - 4, y - 4, 83, 71, 24, 24, 128, 128);
 		}
 		
 		page.parent.renderItemStack(x, y, mouseX, mouseY, items.get((page.parent.ticksInBook / 20) % items.size()));

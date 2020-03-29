@@ -1,12 +1,6 @@
 package vazkii.patchouli.client.book.gui;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.resource.language.I18n;
@@ -16,6 +10,11 @@ import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.client.book.gui.button.GuiButtonCategory;
 import vazkii.patchouli.client.book.gui.button.GuiButtonEntry;
 import vazkii.patchouli.common.book.Book;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class GuiBookEntryList extends GuiBook {
 
@@ -46,7 +45,7 @@ public abstract class GuiBookEntryList extends GuiBook {
 		if(shouldSortEntryList())
 			Collections.sort(allEntries);
 		
-		searchField = new TextFieldWidget(font, 160, 170, 90, 12, "");
+		searchField = new TextFieldWidget(textRenderer, 160, 170, 90, 12, "");
 		searchField.setMaxLength(32);
 		searchField.setHasBorder(false);
 		searchField.setFocusUnlocked(false);

@@ -1,29 +1,21 @@
 package vazkii.patchouli.client.book.gui;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.TextFormat;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import vazkii.patchouli.client.base.PersistentData;
 import vazkii.patchouli.client.book.BookCategory;
-import vazkii.patchouli.client.book.gui.button.GuiButtonBookAdvancements;
-import vazkii.patchouli.client.book.gui.button.GuiButtonBookEdit;
-import vazkii.patchouli.client.book.gui.button.GuiButtonBookHistory;
-import vazkii.patchouli.client.book.gui.button.GuiButtonBookResize;
-import vazkii.patchouli.client.book.gui.button.GuiButtonCategory;
-import vazkii.patchouli.client.book.gui.button.GuiButtonIndex;
+import vazkii.patchouli.client.book.gui.button.*;
 import vazkii.patchouli.client.gui.GuiAdvancementsExt;
 import vazkii.patchouli.common.base.PatchouliConfig;
 import vazkii.patchouli.common.book.Book;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class GuiBookLanding extends GuiBook {
 
@@ -129,7 +121,7 @@ public class GuiBookLanding extends GuiBook {
 		drawFromTexture(book, -8, 12, 0, 180, 140, 31);
 
 		int color = book.nameplateColor;
-		font.draw(book.getBookItem().getName().asFormattedString(), 13, 16, color);
+		textRenderer.draw(book.getBookItem().getName().asFormattedString(), 13, 16, color);
 		book.getFont().draw(book.contents.getSubtitle(), 24, 24, color);
 	}
 
@@ -145,7 +137,7 @@ public class GuiBookLanding extends GuiBook {
 		}
 
 		if(!lines.isEmpty()) {
-			lines.add(TextFormat.GREEN + I18n.translate("patchouli.gui.lexicon.loading_error_log"));
+			lines.add(Formatting.GREEN + I18n.translate("patchouli.gui.lexicon.loading_error_log"));
 			setTooltip(lines);
 		}
 	}
@@ -175,7 +167,7 @@ public class GuiBookLanding extends GuiBook {
 	}
 	
 	public void handleButtonAdvancements(ButtonWidget button) {
-		minecraft.openScreen(new GuiAdvancementsExt(minecraft.player.networkHandler.getAdvancementHandler(), this, book.advancementsTab));
+		client.openScreen(new GuiAdvancementsExt(client.player.networkHandler.getAdvancementHandler(), this, book.advancementsTab));
 	}
 
 	public void handleButtonEdit(ButtonWidget button) {
@@ -184,7 +176,7 @@ public class GuiBookLanding extends GuiBook {
 			book.reloadContentsAndExtensions();
 			book.reloadLocks(false);
 			displayLexiconGui(new GuiBookLanding(book), false);
-			minecraft.player.sendMessage(new TranslatableText("patchouli.gui.lexicon.reloaded", (System.currentTimeMillis() - time)));
+			client.player.sendMessage(new TranslatableText("patchouli.gui.lexicon.reloaded", (System.currentTimeMillis() - time)));
 		} else displayLexiconGui(new GuiBookWriter(book), true);
 	}
 	

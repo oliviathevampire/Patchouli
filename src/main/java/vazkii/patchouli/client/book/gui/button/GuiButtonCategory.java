@@ -1,11 +1,10 @@
 package vazkii.patchouli.client.book.gui.button;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.SoundManager;
-import net.minecraft.client.util.TextFormat;
+import net.minecraft.util.Formatting;
 import vazkii.patchouli.client.base.ClientTicker;
 import vazkii.patchouli.client.book.BookCategory;
 import vazkii.patchouli.client.book.BookIcon;
@@ -64,8 +63,8 @@ public class GuiButtonCategory extends ButtonWidget {
 				GuiBook.drawMarking(parent.book, x, y, 0, category.getReadState());
 			RenderSystem.popMatrix();
 
-			if(isHovered)
-				parent.setTooltip(locked ? (TextFormat.GRAY + I18n.translate("patchouli.gui.lexicon.locked")) : name);
+			if(isHovered())
+				parent.setTooltip(locked ? (Formatting.GRAY + I18n.translate("patchouli.gui.lexicon.locked")) : name);
 		}
 	}
 

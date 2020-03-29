@@ -1,11 +1,6 @@
 package vazkii.patchouli.client.book.gui;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
@@ -21,6 +16,10 @@ import vazkii.patchouli.client.base.PersistentData.DataHolder.BookData.Bookmark;
 import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.client.book.BookPage;
 import vazkii.patchouli.common.book.Book;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GuiBookEntry extends GuiBook implements IComponentRenderContext {
 
@@ -218,8 +217,8 @@ public class GuiBookEntry extends GuiBook implements IComponentRenderContext {
 		if(stack == null || stack.isEmpty())
 			return;
 
-		minecraft.getItemRenderer().renderGuiItem(stack, x, y);
-		minecraft.getItemRenderer().renderGuiItemOverlay(font, stack, x, y);
+		client.getItemRenderer().renderGuiItem(stack, x, y);
+		client.getItemRenderer().renderGuiItemOverlay(textRenderer, stack, x, y);
 
 		if(isMouseInRelativeRange(mouseX, mouseY, x, y, 16, 16))
 			setTooltipStack(stack);

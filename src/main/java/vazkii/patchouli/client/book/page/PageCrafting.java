@@ -9,7 +9,7 @@ import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.ShapedRecipe;
-import net.minecraft.util.DefaultedList;
+import net.minecraft.util.collection.DefaultedList;
 import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.client.book.page.abstr.PageDoubleRecipeRegistry;
 
@@ -23,13 +23,13 @@ public class PageCrafting extends PageDoubleRecipeRegistry<CraftingRecipe> {
 	protected void drawRecipe(CraftingRecipe recipe, int recipeX, int recipeY, int mouseX, int mouseY, boolean second) {
 		mc.getTextureManager().bindTexture(book.craftingTexture);
 		RenderSystem.enableBlend();
-		DrawableHelper.blit(recipeX - 2, recipeY - 2, 0, 0, 100, 62, 128, 128);
+		DrawableHelper.drawTexture(recipeX - 2, recipeY - 2, 0, 0, 100, 62, 128, 128);
 
 		boolean shaped = recipe instanceof ShapedRecipe;
 		if(!shaped) {
 			int iconX = recipeX + 62;
 			int iconY = recipeY + 2;
-			DrawableHelper.blit(iconX, iconY, 0, 64, 11, 11, 128, 128);
+			DrawableHelper.drawTexture(iconX, iconY, 0, 64, 11, 11, 128, 128);
 			if(parent.isMouseInRelativeRange(mouseX, mouseY, iconX, iconY, 11, 11))
 				parent.setTooltip(I18n.translate("patchouli.gui.lexicon.shapeless"));
 		}

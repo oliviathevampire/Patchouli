@@ -52,7 +52,7 @@ public class BookIcon {
 		case RESOURCE:
 			RenderSystem.color4f(1F, 1F, 1F, 1F);
 			mc.getTextureManager().bindTexture(res);
-			DrawableHelper.blit(x, y, 0, 0, 16, 16, 16, 16);
+			DrawableHelper.drawTexture(x, y, 0, 0, 16, 16, 16, 16);
 			break;
 		}
 	}

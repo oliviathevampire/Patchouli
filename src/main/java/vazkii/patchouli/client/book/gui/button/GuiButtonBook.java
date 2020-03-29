@@ -1,13 +1,13 @@
 package vazkii.patchouli.client.book.gui.button;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Supplier;
-
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.sound.SoundManager;
 import vazkii.patchouli.client.book.gui.GuiBook;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Supplier;
 
 public class GuiButtonBook extends ButtonWidget {
 
@@ -39,7 +39,7 @@ public class GuiButtonBook extends ButtonWidget {
 	public void renderButton(int mouseX, int mouseY, float partialTicks) {
 		RenderSystem.color3f(1F, 1F, 1F);
 		GuiBook.drawFromTexture(parent.book, x, y, u + (isHovered() ? width : 0), v, width, height);
-		if(isHovered)
+		if(isHovered())
 			parent.setTooltip(getTooltip());
 	}
 

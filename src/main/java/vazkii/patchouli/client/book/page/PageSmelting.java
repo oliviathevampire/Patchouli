@@ -19,7 +19,7 @@ public class PageSmelting extends PageDoubleRecipeRegistry<SmeltingRecipe> {
     protected void drawRecipe(SmeltingRecipe recipe, int recipeX, int recipeY, int mouseX, int mouseY, boolean second) {
         mc.getTextureManager().bindTexture(book.craftingTexture);
         RenderSystem.enableBlend();
-        DrawableHelper.blit(recipeX, recipeY, 11, 71, 96, 24, 128, 128);
+        DrawableHelper.drawTexture(recipeX, recipeY, 11, 71, 96, 24, 128, 128);
         parent.drawCenteredStringNoShadow(getTitle(second), GuiBook.PAGE_WIDTH / 2, recipeY - 10, book.headerColor);
 
         parent.renderIngredient(recipeX + 4, recipeY + 4, mouseX, mouseY, recipe.getPreviewInputs().get(0));

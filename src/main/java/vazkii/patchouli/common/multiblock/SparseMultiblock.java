@@ -68,4 +68,5 @@ public class SparseMultiblock extends AbstractMultiblock {
         IStateMatcher matcher = data.getOrDefault(new BlockPos(x, y, z), StateMatcher.ANY);
         return matcher.getStatePredicate().test(world, checkPos, state);
     }
+
 }

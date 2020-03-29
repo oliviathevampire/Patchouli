@@ -1,9 +1,8 @@
 package vazkii.patchouli.client.book.gui.button;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.TextFormat;
+import net.minecraft.util.Formatting;
 import vazkii.patchouli.client.base.PersistentData.DataHolder.BookData.Bookmark;
 import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.client.book.gui.GuiBook;
@@ -57,7 +56,7 @@ public class GuiButtonBookBookmark extends GuiButtonBook {
 
 		return new String[] {
 				entry.getName(),
-				TextFormat.GRAY + I18n.translate(multiblock
+				Formatting.GRAY + I18n.translate(multiblock
 						? "patchouli.gui.lexicon.multiblock_bookmark"
 								: "patchouli.gui.lexicon.remove_bookmark")
 		};

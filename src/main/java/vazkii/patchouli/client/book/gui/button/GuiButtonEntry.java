@@ -1,12 +1,11 @@
 package vazkii.patchouli.client.book.gui.button;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.SoundManager;
-import net.minecraft.client.util.TextFormat;
+import net.minecraft.util.Formatting;
 import vazkii.patchouli.client.base.ClientTicker;
 import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.client.book.gui.GuiBook;
@@ -48,7 +47,7 @@ public class GuiButtonEntry extends ButtonWidget {
 			
 			RenderSystem.scalef(2F, 2F, 2F);
 
-			String name = (entry.isPriority() ? TextFormat.ITALIC : "") + entry.getName();
+			String name = (entry.isPriority() ? Formatting.ITALIC : "") + entry.getName();
 			if(locked) {
 				name = I18n.translate("patchouli.gui.lexicon.locked");
 			}

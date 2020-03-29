@@ -1,10 +1,6 @@
 package vazkii.patchouli.client.base;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.google.common.base.Preconditions;
-
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.client.MinecraftClient;
@@ -15,6 +11,9 @@ import vazkii.patchouli.client.book.ClientBookRegistry;
 import vazkii.patchouli.common.base.PatchouliConfig;
 import vazkii.patchouli.common.book.Book;
 import vazkii.patchouli.common.book.BookRegistry;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class ClientAdvancements {
 
@@ -63,7 +62,7 @@ public class ClientAdvancements {
 		public Visibility draw(ToastManager toastGui, long delta) {
 			toastGui.getGame().getTextureManager().bindTexture(TOASTS_TEX);
 			RenderSystem.color3f(1.0F, 1.0F, 1.0F);
-			toastGui.blit(0, 0, 0, 32, 160, 32);
+			toastGui.drawTexture(0, 0, 0, 32, 160, 32);
 
 			toastGui.getGame().textRenderer.draw(I18n.translate(book.name), 30, 7, -11534256);
 			toastGui.getGame().textRenderer.draw(I18n.translate("patchouli.gui.lexicon.toast.info"), 30, 17, -16777216);

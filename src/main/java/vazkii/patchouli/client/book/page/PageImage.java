@@ -38,7 +38,7 @@ public class PageImage extends PageWithText {
 		RenderSystem.color3f(1F, 1F, 1F);
 		RenderSystem.enableBlend();
 		RenderSystem.scalef(0.5F, 0.5F, 0.5F);
-		parent.blit(x * 2 + 6, y * 2 + 6, 0, 0, 200, 200);
+		parent.drawTexture(x * 2 + 6, y * 2 + 6, 0, 0, 200, 200);
 		RenderSystem.scalef(2F, 2F, 2F);
 
 		if(border)

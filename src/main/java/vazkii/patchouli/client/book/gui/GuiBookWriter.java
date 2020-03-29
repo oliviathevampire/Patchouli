@@ -25,7 +25,7 @@ public class GuiBookWriter extends GuiBook {
 		super.init();
 
 		text = new BookTextRenderer(this, I18n.translate("patchouli.gui.lexicon.editor.info"), LEFT_PAGE_X, TOP_PADDING + 20);
-		textfield = new TextFieldWidget(font, 10, FULL_HEIGHT - 40, PAGE_WIDTH, 20, "");
+		textfield = new TextFieldWidget(textRenderer, 10, FULL_HEIGHT - 40, PAGE_WIDTH, 20, "");
 		textfield.setMaxLength(Integer.MAX_VALUE);
 		textfield.setText(savedText);
 
