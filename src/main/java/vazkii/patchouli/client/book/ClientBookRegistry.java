@@ -1,38 +1,21 @@
 package vazkii.patchouli.client.book;
 
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-
+import com.google.gson.*;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
-import vazkii.patchouli.client.book.page.PageCrafting;
-import vazkii.patchouli.client.book.page.PageEmpty;
-import vazkii.patchouli.client.book.page.PageEntity;
-import vazkii.patchouli.client.book.page.PageImage;
-import vazkii.patchouli.client.book.page.PageLink;
-import vazkii.patchouli.client.book.page.PageMultiblock;
-import vazkii.patchouli.client.book.page.PageQuest;
-import vazkii.patchouli.client.book.page.PageRelations;
-import vazkii.patchouli.client.book.page.PageSmelting;
-import vazkii.patchouli.client.book.page.PageSpotlight;
-import vazkii.patchouli.client.book.page.PageTemplate;
-import vazkii.patchouli.client.book.page.PageText;
+import vazkii.patchouli.client.book.page.*;
 import vazkii.patchouli.client.book.template.BookTemplate;
 import vazkii.patchouli.client.book.template.TemplateComponent;
 import vazkii.patchouli.client.handler.UnicodeFontHandler;
+import vazkii.patchouli.common.base.PatchouliSounds;
 import vazkii.patchouli.common.book.Book;
 import vazkii.patchouli.common.book.BookRegistry;
 import vazkii.patchouli.common.util.SerializationUtil;
+
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ClientBookRegistry {
 
@@ -83,7 +66,8 @@ public class ClientBookRegistry {
 	}
 	
 	public void displayBookGui(Identifier bookStr) {
-		currentLang = MinecraftClient.getInstance().getLanguageManager().getLanguage().getCode();
+		MinecraftClient mc = MinecraftClient.getInstance();
+		currentLang = mc.getLanguageManager().getLanguage().getCode();
 		
 		Book book = BookRegistry.INSTANCE.books.get(bookStr);
 
@@ -94,6 +78,11 @@ public class ClientBookRegistry {
 			}
 
 			book.contents.openLexiconGui(book.contents.getCurrentGui(), false);
+
+			if (mc.player != null) {
+				SoundEvent sfx = PatchouliSounds.getSound(book.openSound, PatchouliSounds.book_open);
+				mc.player.playSound(sfx, 1F, (float) (0.7 + Math.random() * 0.4));
+			}
 		}
 	}
 
